@@ -58,3 +58,6 @@ instance/
 # Testing
 .coverage
 .pytest_cache/
+env/
+node_modules/
+

@@ -6,3 +6,9 @@ PyPDF2==3.0.1
 requests==2.31.0
 chromadb==0.4.15
 sentence-transformers==2.2.2
+easyocr==1.7.0
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+python-dotenv
