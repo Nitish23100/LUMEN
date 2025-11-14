@@ -1,0 +1,25 @@
+body {
+    background: #f1f1f1;
+    font-family: Arial;
+    padding: 40px;
+}
+
+.box, .card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px auto;
+    width: 450px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.btn {
+    padding: 10px 20px;
+    background: #4285f4;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 10px;
+}

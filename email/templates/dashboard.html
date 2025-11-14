@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Your Invoice & Bank Statement Emails</h2>
+<a href="/logout">Logout</a>
+
+{% for email in emails %}
+<div class="card">
+    <p>{{ email.snippet }}</p>
+    {% for att in email.attachments %}
+        <a class="btn"
+           href="/download/{{ att.messageId }}/{{ att.attachmentId }}/{{ att.filename }}">
+           Download {{ att.filename }}
+        </a><br>
+    {% endfor %}
+</div>
+{% endfor %}
+
+{% endblock %}
