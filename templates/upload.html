@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}LUMEN - Upload{% endblock %}
+
+{% block content %}
+<div class="upload-section d-flex align-items-center justify-content-center flex-grow-1">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="glass-card">
+                    <div class="text-center mb-5">
+                        <h2 class="gradient-text mb-3">Upload Your Document</h2>
+                        <p class="text-secondary">
+                            Select a file to upload and process with AI
+                        </p>
+                    </div>
+                    
+                    <form id="uploadForm" enctype="multipart/form-data" class="upload-form">
+                        <div class="upload-area mb-5" id="uploadArea">
+                            <div class="upload-content text-center">
+                                <i class="bi bi-cloud-upload fs-1 mb-4" style="color: var(--purple);"></i>
+                                <h5 class="text-primary mb-3">Drag & Drop your file here</h5>
+                                <p class="text-secondary mb-4">Supported: JPG, PNG, PDF, TXT files</p>
+                                <input type="file" name="file" id="fileInput" class="d-none" accept=".pdf,.txt,.jpg,.jpeg,.png,.gif">
+                                <button type="button" class="btn btn-outline-light" onclick="document.getElementById('fileInput').click()">
+                                    Choose File
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="file-info d-none mb-5" id="fileInfo">
+                            <div class="glass-card elevated">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-file-earmark fs-4 me-3" style="color: var(--purple);"></i>
+                                    <div class="flex-grow-1">
+                                        <h6 class="text-primary mb-1" id="fileName"></h6>
+                                        <small class="text-secondary" id="fileSize"></small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearFile()">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loading indicator -->
+                        <div class="d-none mb-4" id="loadingIndicator">
+                            <div class="glass-card elevated text-center">
+                                <div class="spinner-border text-primary mb-3" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="text-secondary mb-0">Processing your file with AI...</p>
+                            </div>
+                        </div>
+
+                        <!-- Success/Error messages -->
+                        <div class="d-none mb-4" id="messageArea">
+                            <div class="glass-card elevated" id="messageCard">
+                                <div id="messageContent"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+                            <button type="submit" class="btn btn-gradient btn-lg px-5" id="uploadBtn" disabled>
+                                <i class="bi bi-upload me-2"></i>
+                                Upload & Process
+                            </button>
+                            <a href="{{ url_for('home') }}" class="btn btn-outline-light btn-lg px-5">
+                                Back to Home
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadForm = document.getElementById('uploadForm');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const messageArea = document.getElementById('messageArea');
+    const messageContent = document.getElementById('messageContent');
+    const messageCard = document.getElementById('messageCard');
+    
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('drag-over');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFileSelect(files[0]);
+        }
+    });
+    
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    // Form submission
+    uploadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!fileInput.files[0]) {
+            showMessage('Please select a file to upload.', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        // Show loading indicator
+        loadingIndicator.classList.remove('d-none');
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Processing...';
+        hideMessage();
+
+        // Submit form via AJAX
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            loadingIndicator.classList.add('d-none');
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '<i class="bi bi-upload me-2"></i>Upload & Process';
+
+            if (data.success) {
+                showSuccessMessage(data);
+            } else {
+                showMessage(data.error || 'An error occurred while processing the file.', 'error');
+            }
+        })
+        .catch(error => {
+            loadingIndicator.classList.add('d-none');
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '<i class="bi bi-upload me-2"></i>Upload & Process';
+            showMessage('Network error. Please try again.', 'error');
+            console.error('Error:', error);
+        });
+    });
+    
+    function handleFileSelect(file) {
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        fileInfo.classList.remove('d-none');
+        uploadBtn.disabled = false;
+        hideMessage();
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function showMessage(message, type) {
+        messageContent.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi ${type === 'error' ? 'bi-exclamation-triangle' : 'bi-info-circle'} fs-4 me-3" 
+                   style="color: ${type === 'error' ? '#FF4757' : '#4F8EFF'};"></i>
+                <div>
+                    <p class="mb-0 ${type === 'error' ? 'text-danger' : 'text-info'}">${message}</p>
+                </div>
+            </div>
+        `;
+        messageCard.className = `glass-card elevated ${type === 'error' ? 'border-danger' : 'border-info'}`;
+        messageArea.classList.remove('d-none');
+    }
+
+    function showSuccessMessage(data) {
+        const extractedData = data.data;
+        messageContent.innerHTML = `
+            <div class="text-center">
+                <i class="bi bi-check-circle fs-1 mb-3" style="color: #00D9A3;"></i>
+                <h5 class="text-success mb-3">File Processed Successfully!</h5>
+                <div class="row text-start">
+                    <div class="col-md-6">
+                        <p><strong>Vendor:</strong> ${extractedData.vendor || 'Unknown'}</p>
+                        <p><strong>Date:</strong> ${extractedData.date || 'Unknown'}</p>
+                        <p><strong>Amount:</strong> $${(extractedData.total || 0).toFixed(2)}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Category:</strong> ${(extractedData.category || 'other').charAt(0).toUpperCase() + (extractedData.category || 'other').slice(1)}</p>
+                        <p><strong>Confidence:</strong> ${extractedData.confidence_score || 0}%</p>
+                        <p><strong>Transaction ID:</strong> #${extractedData.transaction_id}</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="/preview/${extractedData.transaction_id}" class="btn btn-gradient me-2">
+                        <i class="bi bi-eye me-2"></i>View Details
+                    </a>
+                    <button type="button" class="btn btn-outline-light" onclick="resetForm()">
+                        <i class="bi bi-plus-circle me-2"></i>Upload Another
+                    </button>
+                </div>
+            </div>
+        `;
+        messageCard.className = 'glass-card elevated border-success';
+        messageArea.classList.remove('d-none');
+    }
+
+    function hideMessage() {
+        messageArea.classList.add('d-none');
+    }
+
+    window.resetForm = function() {
+        clearFile();
+        hideMessage();
+    };
+    
+    window.clearFile = function() {
+        fileInput.value = '';
+        fileInfo.classList.add('d-none');
+        uploadBtn.disabled = true;
+        hideMessage();
+    };
+});
+</script>
+{% endblock %}

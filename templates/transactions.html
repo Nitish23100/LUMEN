@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Transactions - LUMEN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', sans-serif;
+            background: #000000;
+            color: #FFFFFF;
+            min-height: 100vh;
+            background-image: radial-gradient(ellipse at top left, rgba(108, 63, 238, 0.3) 0%, rgba(255, 107, 157, 0.2) 30%, rgba(255, 140, 66, 0.2) 60%, transparent 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6C3FEE 0%, #8B5EFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #A0A0A0;
+            font-size: 1.125rem;
+        }
+
+        .transactions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .transaction-card {
+            background: rgba(26, 26, 26, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            backdrop-filter: blur(40px);
+            box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.5);
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .transaction-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.6);
+            border-color: rgba(108, 63, 238, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .vendor-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 0.25rem;
+        }
+
+        .transaction-date {
+            color: #A0A0A0;
+            font-size: 0.875rem;
+        }
+
+        .amount {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #00D9A3;
+        }
+
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .category-badge {
+            background: rgba(0, 217, 163, 0.2);
+            color: #00D9A3;
+            border-radius: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .confidence-score {
+            color: #A0A0A0;
+            font-size: 0.875rem;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .payment-method {
+            color: #A0A0A0;
+            font-size: 0.875rem;
+        }
+
+        .view-btn {
+            background: linear-gradient(135deg, #6C3FEE 0%, #8B5EFF 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .view-btn:hover {
+            background: linear-gradient(135deg, #5028C6 0%, #6C3FEE 100%);
+        }
+
+        .no-transactions {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #A0A0A0;
+        }
+
+        .no-transactions h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #FFFFFF;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6C3FEE 0%, #8B5EFF 100%);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(108, 63, 238, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5028C6 0%, #6C3FEE 100%);
+            box-shadow: 0 6px 16px rgba(108, 63, 238, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .transactions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LUMEN</h1>
+            <p>All Transactions</p>
+        </div>
+
+        {% if transactions %}
+        <div class="transactions-grid">
+            {% for transaction in transactions %}
+            <div class="transaction-card" onclick="window.location.href='{{ url_for('preview_transaction', transaction_id=transaction.id) }}'">
+                <div class="card-header">
+                    <div>
+                        <div class="vendor-name">{{ transaction.vendor or 'Unknown Vendor' }}</div>
+                        <div class="transaction-date">{{ transaction.date or 'Unknown Date' }}</div>
+                    </div>
+                    <div class="amount">${{ "%.2f"|format(transaction.amount or 0) }}</div>
+                </div>
+                
+                <div class="card-details">
+                    <span class="category-badge">{{ (transaction.category or 'other').title() }}</span>
+                    <span class="confidence-score">{{ transaction.confidence_score or 0 }}% confidence</span>
+                </div>
+                
+                <div class="card-footer">
+                    <span class="payment-method">{{ (transaction.payment_method or 'unknown').title() }}</span>
+                    <button class="view-btn">View Details</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-transactions">
+            <h3>No Transactions Found</h3>
+            <p>Upload your first receipt to get started with LUMEN.</p>
+        </div>
+        {% endif %}
+
+        <div class="actions">
+            <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
+            <a href="{{ url_for('upload') }}" class="btn btn-primary">Upload Receipt</a>
+        </div>
+    </div>
+</body>
+</html>

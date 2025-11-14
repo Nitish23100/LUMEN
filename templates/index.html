@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}LUMEN - Home{% endblock %}
+
+{% block content %}
+<div class="hero-section d-flex align-items-center justify-content-center flex-grow-1">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+                <div class="glass-card text-center">
+                    <h1 class="display-4 fw-bold gradient-text mb-4">LUMEN</h1>
+                    <p class="lead text-secondary mb-5">
+                        Welcome to LUMEN - Your intelligent document processing platform
+                    </p>
+                    <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+                        <a href="{{ url_for('upload') }}" class="btn btn-gradient btn-lg px-5">
+                            Get Started
+                        </a>
+                        <button class="btn btn-outline-light btn-lg px-5">
+                            Learn More
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="features-section py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="glass-card h-100">
+                    <div class="feature-icon mb-4">
+                        <i class="bi bi-upload fs-1 text-white"></i>
+                    </div>
+                    <h5 class="text-primary mb-3">Easy Upload</h5>
+                    <p class="text-secondary">
+                        Upload your documents with a simple drag-and-drop interface
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card h-100">
+                    <div class="feature-icon mb-4">
+                        <i class="bi bi-cpu fs-1 text-white"></i>
+                    </div>
+                    <h5 class="text-primary mb-3">AI Processing</h5>
+                    <p class="text-secondary">
+                        Leverage advanced AI to analyze and process your content
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card h-100">
+                    <div class="feature-icon mb-4">
+                        <i class="bi bi-lightning fs-1 text-white"></i>
+                    </div>
+                    <h5 class="text-primary mb-3">Fast Results</h5>
+                    <p class="text-secondary">
+                        Get instant insights and results from your documents
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
