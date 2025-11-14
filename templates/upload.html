@@ -1,246 +1,678 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Receipt - LUMEN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block title %}LUMEN - Upload{% endblock %}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', sans-serif;
+            background: #000000;
+            color: #FFFFFF;
+            min-height: 100vh;
+            background-image: radial-gradient(ellipse at top left, rgba(108, 63, 238, 0.3) 0%, rgba(255, 107, 157, 0.2) 30%, rgba(255, 140, 66, 0.2) 60%, transparent 100%);
+        }
 
-{% block content %}
-<div class="upload-section d-flex align-items-center justify-content-center flex-grow-1">
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6C3FEE 0%, #8B5EFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #A0A0A0;
+            font-size: 1.125rem;
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .glass-card {
+            background: rgba(26, 26, 26, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            backdrop-filter: blur(40px);
+            box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.5);
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(108, 63, 238, 0.3);
+            border-radius: 1rem;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: #6C3FEE;
+            background: rgba(108, 63, 238, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #6C3FEE;
+            margin-bottom: 1rem;
+        }
+
+        .upload-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtitle {
+            color: #A0A0A0;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6C3FEE 0%, #8B5EFF 100%);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(108, 63, 238, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5028C6 0%, #6C3FEE 100%);
+            box-shadow: 0 6px 16px rgba(108, 63, 238, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00D9A3 0%, #00B894 100%);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(0, 217, 163, 0.4);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #00B894 0%, #00A085 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .file-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .loading-spinner {
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid rgba(108, 63, 238, 0.3);
+            border-top: 3px solid #6C3FEE;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-section {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            color: #A0A0A0;
+            font-size: 1.125rem;
+        }
+
+        .preview-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 500ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .preview-section.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .success-alert {
+            background: rgba(0, 217, 163, 0.2);
+            border: 1px solid rgba(0, 217, 163, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 2rem;
+            color: #00D9A3;
+            margin-bottom: 0.5rem;
+        }
+
+        .vendor-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .vendor-icon {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, #6C3FEE 0%, #8B5EFF 100%);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .vendor-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .transaction-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+
+        .detail-label {
+            color: #A0A0A0;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .amount-section {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .total-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00D9A3 0%, #00B894 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sub-amounts {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .sub-amount {
+            color: #A0A0A0;
+            font-size: 0.875rem;
+        }
+
+        .category-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .category-groceries { background: rgba(0, 217, 163, 0.2); color: #00D9A3; }
+        .category-dining { background: rgba(79, 142, 255, 0.2); color: #4F8EFF; }
+        .category-shopping { background: rgba(108, 63, 238, 0.2); color: #8B5EFF; }
+        .category-transportation { background: rgba(255, 140, 66, 0.2); color: #FF8C42; }
+        .category-utilities { background: rgba(255, 107, 157, 0.2); color: #FF6B9D; }
+        .category-entertainment { background: rgba(255, 215, 61, 0.2); color: #FFD93D; }
+        .category-healthcare { background: rgba(255, 71, 87, 0.2); color: #FF4757; }
+        .category-other { background: rgba(160, 160, 160, 0.2); color: #A0A0A0; }
+
+        .items-section {
+            margin: 2rem 0;
+        }
+
+        .items-header {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .items-list {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-weight: 500;
+        }
+
+        .item-price {
+            color: #A0A0A0;
+            font-weight: 500;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .single-column {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .transaction-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="glass-card">
-                    <div class="text-center mb-5">
-                        <h2 class="gradient-text mb-3">Upload Your Document</h2>
-                        <p class="text-secondary">
-                            Select a file to upload and process with AI
-                        </p>
+        <div class="header">
+            <h1>LUMEN</h1>
+            <p>AI-Powered Receipt Analysis</p>
+        </div>
+
+        <div class="upload-section">
+            <!-- Upload Section -->
+            <div class="glass-card" id="uploadCard">
+                <h3 style="margin-bottom: 2rem; text-align: center;">Upload Receipt</h3>
+                
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📄</div>
+                        <div class="upload-title">Drag & Drop your receipt here</div>
+                        <div class="upload-subtitle">or click to browse files</div>
+                        <input type="file" id="fileInput" name="file" accept=".jpg,.jpeg,.png,.pdf,.txt" style="display: none;">
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                            Choose File
+                        </button>
                     </div>
-                    
-                    <form id="uploadForm" enctype="multipart/form-data" class="upload-form">
-                        <div class="upload-area mb-5" id="uploadArea">
-                            <div class="upload-content text-center">
-                                <i class="bi bi-cloud-upload fs-1 mb-4" style="color: var(--purple);"></i>
-                                <h5 class="text-primary mb-3">Drag & Drop your file here</h5>
-                                <p class="text-secondary mb-4">Supported: JPG, PNG, PDF, TXT files</p>
-                                <input type="file" name="file" id="fileInput" class="d-none" accept=".pdf,.txt,.jpg,.jpeg,.png,.gif">
-                                <button type="button" class="btn btn-outline-light" onclick="document.getElementById('fileInput').click()">
-                                    Choose File
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="file-info d-none mb-5" id="fileInfo">
-                            <div class="glass-card elevated">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-file-earmark fs-4 me-3" style="color: var(--purple);"></i>
-                                    <div class="flex-grow-1">
-                                        <h6 class="text-primary mb-1" id="fileName"></h6>
-                                        <small class="text-secondary" id="fileSize"></small>
-                                    </div>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearFile()">
-                                        <i class="bi bi-x"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Loading indicator -->
-                        <div class="d-none mb-4" id="loadingIndicator">
-                            <div class="glass-card elevated text-center">
-                                <div class="spinner-border text-primary mb-3" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <p class="text-secondary mb-0">Processing your file with AI...</p>
-                            </div>
+                    <div id="fileInfo" class="file-info hidden">
+                        <span>📎</span>
+                        <div>
+                            <div id="fileName"></div>
+                            <div id="fileSize" style="color: #A0A0A0; font-size: 0.875rem;"></div>
                         </div>
+                        <button type="button" onclick="clearFile()" style="background: none; border: none; color: #FF4757; cursor: pointer;">✕</button>
+                    </div>
 
-                        <!-- Success/Error messages -->
-                        <div class="d-none mb-4" id="messageArea">
-                            <div class="glass-card elevated" id="messageCard">
-                                <div id="messageContent"></div>
-                            </div>
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button type="submit" id="uploadBtn" class="btn btn-primary" disabled>
+                            <span>🚀</span> Upload & Analyze
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Loading Section -->
+            <div class="glass-card hidden" id="loadingCard">
+                <div class="loading-section">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Analyzing receipt with AI...</div>
+                    <div style="color: #A0A0A0; font-size: 0.875rem; margin-top: 0.5rem;">
+                        This may take a few seconds
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="glass-card preview-section hidden" id="previewCard">
+                <div class="success-alert" id="successAlert">
+                    <div class="success-icon">✅</div>
+                    <div id="confidenceText">Receipt processed successfully with 85% confidence</div>
+                </div>
+
+                <div class="vendor-section">
+                    <div class="vendor-icon" id="vendorIcon">🏪</div>
+                    <div>
+                        <div class="vendor-name" id="vendorName">Store Name</div>
+                        <div style="color: #A0A0A0;" id="transactionDate">2024-01-15</div>
+                    </div>
+                </div>
+
+                <div class="transaction-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Category</div>
+                        <div class="detail-value">
+                            <span class="category-badge" id="categoryBadge">Other</span>
                         </div>
-                        
-                        <div class="d-grid gap-3 d-md-flex justify-content-md-center">
-                            <button type="submit" class="btn btn-gradient btn-lg px-5" id="uploadBtn" disabled>
-                                <i class="bi bi-upload me-2"></i>
-                                Upload & Process
-                            </button>
-                            <a href="{{ url_for('home') }}" class="btn btn-outline-light btn-lg px-5">
-                                Back to Home
-                            </a>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Payment Method</div>
+                        <div class="detail-value" id="paymentMethod">💳 Card</div>
+                    </div>
+                </div>
+
+                <div class="amount-section">
+                    <div class="total-amount" id="totalAmount">$0.00</div>
+                    <div class="sub-amounts">
+                        <div class="sub-amount">Subtotal: $<span id="subtotalAmount">0.00</span></div>
+                        <div class="sub-amount">Tax: $<span id="taxAmount">0.00</span></div>
+                    </div>
+                </div>
+
+                <div class="items-section">
+                    <div class="items-header">Items Purchased</div>
+                    <div class="items-list" id="itemsList">
+                        <div style="text-align: center; color: #A0A0A0; padding: 1rem;">
+                            No items detected
                         </div>
-                    </form>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" id="saveBtn">
+                        <span>💾</span> Save Transaction
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetForm()">
+                        <span>🔄</span> Upload Another
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
 
-{% block scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const uploadArea = document.getElementById('uploadArea');
-    const fileInput = document.getElementById('fileInput');
-    const fileInfo = document.getElementById('fileInfo');
-    const fileName = document.getElementById('fileName');
-    const fileSize = document.getElementById('fileSize');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const uploadForm = document.getElementById('uploadForm');
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const messageArea = document.getElementById('messageArea');
-    const messageContent = document.getElementById('messageContent');
-    const messageCard = document.getElementById('messageCard');
-    
-    // Drag and drop functionality
-    uploadArea.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        uploadArea.classList.add('drag-over');
-    });
-    
-    uploadArea.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        uploadArea.classList.remove('drag-over');
-    });
-    
-    uploadArea.addEventListener('drop', function(e) {
-        e.preventDefault();
-        uploadArea.classList.remove('drag-over');
-        
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            fileInput.files = files;
-            handleFileSelect(files[0]);
-        }
-    });
-    
-    fileInput.addEventListener('change', function(e) {
-        if (e.target.files.length > 0) {
-            handleFileSelect(e.target.files[0]);
-        }
-    });
+    <script>
+        let currentTransactionId = null;
+        let extractedData = null;
 
-    // Form submission
-    uploadForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        if (!fileInput.files[0]) {
-            showMessage('Please select a file to upload.', 'error');
-            return;
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const uploadForm = document.getElementById('uploadForm');
+            const uploadCard = document.getElementById('uploadCard');
+            const loadingCard = document.getElementById('loadingCard');
+            const previewCard = document.getElementById('previewCard');
 
-        const formData = new FormData();
-        formData.append('file', fileInput.files[0]);
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
 
-        // Show loading indicator
-        loadingIndicator.classList.remove('d-none');
-        uploadBtn.disabled = true;
-        uploadBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Processing...';
-        hideMessage();
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+            });
 
-        // Submit form via AJAX
-        fetch('/upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            loadingIndicator.classList.add('d-none');
-            uploadBtn.disabled = false;
-            uploadBtn.innerHTML = '<i class="bi bi-upload me-2"></i>Upload & Process';
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    handleFileSelect(files[0]);
+                }
+            });
 
-            if (data.success) {
-                showSuccessMessage(data);
-            } else {
-                showMessage(data.error || 'An error occurred while processing the file.', 'error');
-            }
-        })
-        .catch(error => {
-            loadingIndicator.classList.add('d-none');
-            uploadBtn.disabled = false;
-            uploadBtn.innerHTML = '<i class="bi bi-upload me-2"></i>Upload & Process';
-            showMessage('Network error. Please try again.', 'error');
-            console.error('Error:', error);
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            // Form submission
+            uploadForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!fileInput.files[0]) {
+                    alert('Please select a file to upload.');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+
+                // Show loading state
+                showLoading();
+
+                // Submit form via AJAX
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        extractedData = data.data;
+                        currentTransactionId = data.data.transaction_id;
+                        showPreview(data.data);
+                    } else {
+                        hideLoading();
+                        alert('Error: ' + (data.error || 'Failed to process file'));
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    alert('Network error. Please try again.');
+                    console.error('Error:', error);
+                });
+            });
+
+            // Save button functionality
+            document.getElementById('saveBtn').addEventListener('click', function() {
+                if (currentTransactionId) {
+                    alert(`Transaction saved successfully! ID: ${currentTransactionId}`);
+                    // Optionally redirect to transaction view
+                    // window.location.href = `/preview/${currentTransactionId}`;
+                }
+            });
         });
-    });
-    
-    function handleFileSelect(file) {
-        fileName.textContent = file.name;
-        fileSize.textContent = formatFileSize(file.size);
-        fileInfo.classList.remove('d-none');
-        uploadBtn.disabled = false;
-        hideMessage();
-    }
-    
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
 
-    function showMessage(message, type) {
-        messageContent.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="bi ${type === 'error' ? 'bi-exclamation-triangle' : 'bi-info-circle'} fs-4 me-3" 
-                   style="color: ${type === 'error' ? '#FF4757' : '#4F8EFF'};"></i>
-                <div>
-                    <p class="mb-0 ${type === 'error' ? 'text-danger' : 'text-info'}">${message}</p>
-                </div>
-            </div>
-        `;
-        messageCard.className = `glass-card elevated ${type === 'error' ? 'border-danger' : 'border-info'}`;
-        messageArea.classList.remove('d-none');
-    }
+        function handleFileSelect(file) {
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileInfo').classList.remove('hidden');
+            document.getElementById('uploadBtn').disabled = false;
+        }
 
-    function showSuccessMessage(data) {
-        const extractedData = data.data;
-        messageContent.innerHTML = `
-            <div class="text-center">
-                <i class="bi bi-check-circle fs-1 mb-3" style="color: #00D9A3;"></i>
-                <h5 class="text-success mb-3">File Processed Successfully!</h5>
-                <div class="row text-start">
-                    <div class="col-md-6">
-                        <p><strong>Vendor:</strong> ${extractedData.vendor || 'Unknown'}</p>
-                        <p><strong>Date:</strong> ${extractedData.date || 'Unknown'}</p>
-                        <p><strong>Amount:</strong> $${(extractedData.total || 0).toFixed(2)}</p>
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showLoading() {
+            document.getElementById('uploadCard').classList.add('hidden');
+            document.getElementById('loadingCard').classList.remove('hidden');
+            document.getElementById('previewCard').classList.add('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingCard').classList.add('hidden');
+            document.getElementById('uploadCard').classList.remove('hidden');
+        }
+
+        function showPreview(data) {
+            document.getElementById('loadingCard').classList.add('hidden');
+            
+            // Update confidence text
+            document.getElementById('confidenceText').textContent = 
+                `Receipt processed successfully with ${data.confidence_score || 0}% confidence`;
+
+            // Update vendor info
+            document.getElementById('vendorName').textContent = data.vendor || 'Unknown Store';
+            document.getElementById('transactionDate').textContent = data.date || 'Unknown Date';
+
+            // Update category badge
+            const category = data.category || 'other';
+            const categoryBadge = document.getElementById('categoryBadge');
+            categoryBadge.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            categoryBadge.className = `category-badge category-${category}`;
+
+            // Update payment method
+            const paymentIcons = {
+                'credit': '💳',
+                'debit': '💳',
+                'cash': '💵',
+                'card': '💳',
+                'unknown': '❓'
+            };
+            const paymentMethod = data.payment_method || 'unknown';
+            document.getElementById('paymentMethod').innerHTML = 
+                `${paymentIcons[paymentMethod] || '💳'} ${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}`;
+
+            // Update amounts
+            document.getElementById('totalAmount').textContent = `$${(data.total || 0).toFixed(2)}`;
+            document.getElementById('subtotalAmount').textContent = (data.subtotal || 0).toFixed(2);
+            document.getElementById('taxAmount').textContent = (data.tax || 0).toFixed(2);
+
+            // Update items list
+            const itemsList = document.getElementById('itemsList');
+            if (data.items && data.items.length > 0) {
+                itemsList.innerHTML = data.items.map(item => `
+                    <div class="item">
+                        <span class="item-name">${item.name || 'Unknown Item'}</span>
+                        <span class="item-price">$${(item.price || 0).toFixed(2)}</span>
                     </div>
-                    <div class="col-md-6">
-                        <p><strong>Category:</strong> ${(extractedData.category || 'other').charAt(0).toUpperCase() + (extractedData.category || 'other').slice(1)}</p>
-                        <p><strong>Confidence:</strong> ${extractedData.confidence_score || 0}%</p>
-                        <p><strong>Transaction ID:</strong> #${extractedData.transaction_id}</p>
+                `).join('');
+            } else {
+                itemsList.innerHTML = `
+                    <div style="text-align: center; color: #A0A0A0; padding: 1rem;">
+                        No individual items detected
                     </div>
-                </div>
-                <div class="mt-3">
-                    <a href="/preview/${extractedData.transaction_id}" class="btn btn-gradient me-2">
-                        <i class="bi bi-eye me-2"></i>View Details
-                    </a>
-                    <button type="button" class="btn btn-outline-light" onclick="resetForm()">
-                        <i class="bi bi-plus-circle me-2"></i>Upload Another
-                    </button>
-                </div>
-            </div>
-        `;
-        messageCard.className = 'glass-card elevated border-success';
-        messageArea.classList.remove('d-none');
-    }
+                `;
+            }
 
-    function hideMessage() {
-        messageArea.classList.add('d-none');
-    }
+            // Show preview with animation
+            const previewCard = document.getElementById('previewCard');
+            previewCard.classList.remove('hidden');
+            setTimeout(() => {
+                previewCard.classList.add('show');
+            }, 100);
+        }
 
-    window.resetForm = function() {
-        clearFile();
-        hideMessage();
-    };
-    
-    window.clearFile = function() {
-        fileInput.value = '';
-        fileInfo.classList.add('d-none');
-        uploadBtn.disabled = true;
-        hideMessage();
-    };
-});
-</script>
-{% endblock %}
+        function clearFile() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileInfo').classList.add('hidden');
+            document.getElementById('uploadBtn').disabled = true;
+        }
+
+        function resetForm() {
+            clearFile();
+            currentTransactionId = null;
+            extractedData = null;
+            
+            document.getElementById('uploadCard').classList.remove('hidden');
+            document.getElementById('loadingCard').classList.add('hidden');
+            document.getElementById('previewCard').classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('previewCard').classList.add('hidden');
+            }, 300);
+        }
+    </script>
+</body>
+</html>

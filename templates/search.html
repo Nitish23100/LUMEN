@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Transactions - LUMEN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', sans-serif;
+            background: #000000;
+            color: #FFFFFF;
+            min-height: 100vh;
+            background-image: radial-gradient(ellipse at top left, rgba(108, 63, 238, 0.3) 0%, rgba(255, 107, 157, 0.2) 30%, rgba(255, 140, 66, 0.2) 60%, transparent 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6C3FEE 0%, #8B5EFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #A0A0A0;
+            font-size: 1.125rem;
+        }
+
+        .search-section {
+            margin-bottom: 3rem;
+        }
+
+        .glass-card {
+            background: rgba(26, 26, 26, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            backdrop-filter: blur(40px);
+            box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.5);
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: #FFFFFF;
+            font-size: 1rem;
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #6C3FEE;
+            box-shadow: 0 0 0 3px rgba(108, 63, 238, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: #A0A0A0;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6C3FEE 0%, #8B5EFF 100%);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(108, 63, 238, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5028C6 0%, #6C3FEE 100%);
+            box-shadow: 0 6px 16px rgba(108, 63, 238, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .examples-section {
+            margin-top: 2rem;
+        }
+
+        .examples-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #A0A0A0;
+        }
+
+        .example-queries {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .example-query {
+            background: rgba(108, 63, 238, 0.1);
+            border: 1px solid rgba(108, 63, 238, 0.2);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: #8B5EFF;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .example-query:hover {
+            background: rgba(108, 63, 238, 0.2);
+            border-color: rgba(108, 63, 238, 0.4);
+        }
+
+        .loading-section {
+            text-align: center;
+            padding: 3rem;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid rgba(108, 63, 238, 0.3);
+            border-top: 3px solid #6C3FEE;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #A0A0A0;
+            font-size: 1.125rem;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-header {
+            margin-bottom: 2rem;
+        }
+
+        .results-count {
+            color: #A0A0A0;
+            font-size: 1rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .transaction-card {
+            background: rgba(26, 26, 26, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            backdrop-filter: blur(40px);
+            box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.5);
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .transaction-card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .transaction-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.6);
+            border-color: rgba(108, 63, 238, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .vendor-info h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .transaction-date {
+            color: #A0A0A0;
+            font-size: 0.875rem;
+        }
+
+        .similarity-section {
+            text-align: right;
+        }
+
+        .similarity-score {
+            font-size: 0.875rem;
+            color: #A0A0A0;
+            margin-bottom: 0.5rem;
+        }
+
+        .similarity-bar {
+            width: 60px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-left: auto;
+        }
+
+        .similarity-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #6C3FEE 0%, #8B5EFF 100%);
+            border-radius: 2px;
+            transition: width 500ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00D9A3;
+            margin-bottom: 1rem;
+        }
+
+        .category-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .category-groceries { background: rgba(0, 217, 163, 0.2); color: #00D9A3; }
+        .category-dining { background: rgba(79, 142, 255, 0.2); color: #4F8EFF; }
+        .category-shopping { background: rgba(108, 63, 238, 0.2); color: #8B5EFF; }
+        .category-transportation { background: rgba(255, 140, 66, 0.2); color: #FF8C42; }
+        .category-utilities { background: rgba(255, 107, 157, 0.2); color: #FF6B9D; }
+        .category-entertainment { background: rgba(255, 215, 61, 0.2); color: #FFD93D; }
+        .category-healthcare { background: rgba(255, 71, 87, 0.2); color: #FF4757; }
+        .category-other { background: rgba(160, 160, 160, 0.2); color: #A0A0A0; }
+
+        .transaction-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #A0A0A0;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-btn {
+            background: linear-gradient(135deg, #6C3FEE 0%, #8B5EFF 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .view-btn:hover {
+            background: linear-gradient(135deg, #5028C6 0%, #6C3FEE 100%);
+            transform: translateY(-1px);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #A0A0A0;
+        }
+
+        .no-results h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #FFFFFF;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-link {
+            color: #A0A0A0;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #FFFFFF;
+            background: rgba(108, 63, 238, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .navigation {
+                flex-wrap: wrap;
+            }
+
+            .example-queries {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LUMEN</h1>
+            <p>AI-Powered Transaction Search</p>
+        </div>
+
+        <div class="navigation">
+            <a href="{{ url_for('home') }}" class="nav-link">🏠 Home</a>
+            <a href="{{ url_for('upload') }}" class="nav-link">📤 Upload</a>
+            <a href="{{ url_for('search') }}" class="nav-link active">🔍 Search</a>
+            <a href="{{ url_for('transactions') }}" class="nav-link">📊 All Transactions</a>
+        </div>
+
+        <div class="search-section">
+            <div class="glass-card">
+                <form id="searchForm" class="search-form">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="Search transactions naturally: 'show me restaurant spending' or 'electronics over $100'"
+                        autocomplete="off"
+                    >
+                    <button type="submit" id="searchBtn" class="btn btn-primary">
+                        <span>🔍</span> Search
+                    </button>
+                </form>
+
+                <div class="examples-section">
+                    <div class="examples-title">Try these example searches:</div>
+                    <div class="example-queries">
+                        <span class="example-query" onclick="searchExample('Show me all groceries')">Show me all groceries</span>
+                        <span class="example-query" onclick="searchExample('Find Amazon purchases')">Find Amazon purchases</span>
+                        <span class="example-query" onclick="searchExample('Dining expenses last month')">Dining expenses last month</span>
+                        <span class="example-query" onclick="searchExample('Walmart shopping trips')">Walmart shopping trips</span>
+                        <span class="example-query" onclick="searchExample('Expensive purchases over $50')">Expensive purchases over $50</span>
+                        <span class="example-query" onclick="searchExample('Coffee and food expenses')">Coffee and food expenses</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Section -->
+        <div class="glass-card loading-section" id="loadingSection">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Searching transactions with AI...</div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <div class="glass-card">
+                <div class="results-header">
+                    <h3 id="resultsTitle">Search Results</h3>
+                    <div class="results-count" id="resultsCount">Found 0 transactions</div>
+                </div>
+
+                <div class="results-grid" id="resultsGrid">
+                    <!-- Results will be populated here -->
+                </div>
+
+                <div class="no-results" id="noResults" style="display: none;">
+                    <h3>No Results Found</h3>
+                    <p>Try a different search query or check your spelling.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const loadingSection = document.getElementById('loadingSection');
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsGrid = document.getElementById('resultsGrid');
+            const resultsCount = document.getElementById('resultsCount');
+            const noResults = document.getElementById('noResults');
+
+            // Search form submission
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const query = searchInput.value.trim();
+                if (!query) {
+                    alert('Please enter a search query');
+                    return;
+                }
+
+                performSearch(query);
+            });
+
+            // Auto-focus search input
+            searchInput.focus();
+
+            function performSearch(query) {
+                // Show loading state
+                showLoading();
+                
+                // Update search button
+                searchBtn.disabled = true;
+                searchBtn.innerHTML = '<span>⏳</span> Searching...';
+
+                // Perform search
+                fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        k: 10
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    resetSearchButton();
+
+                    if (data.success) {
+                        displayResults(data.results, query);
+                    } else {
+                        alert('Search failed: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    resetSearchButton();
+                    alert('Network error. Please try again.');
+                    console.error('Search error:', error);
+                });
+            }
+
+            function showLoading() {
+                resultsSection.style.display = 'none';
+                loadingSection.style.display = 'block';
+            }
+
+            function hideLoading() {
+                loadingSection.style.display = 'none';
+            }
+
+            function resetSearchButton() {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = '<span>🔍</span> Search';
+            }
+
+            function displayResults(results, query) {
+                resultsCount.textContent = `Found ${results.length} transactions for "${query}"`;
+                
+                if (results.length === 0) {
+                    resultsGrid.innerHTML = '';
+                    noResults.style.display = 'block';
+                } else {
+                    noResults.style.display = 'none';
+                    renderResults(results);
+                }
+                
+                resultsSection.style.display = 'block';
+            }
+
+            function renderResults(results) {
+                resultsGrid.innerHTML = '';
+                
+                results.forEach((transaction, index) => {
+                    const card = createTransactionCard(transaction);
+                    resultsGrid.appendChild(card);
+                    
+                    // Animate card appearance
+                    setTimeout(() => {
+                        card.classList.add('show');
+                    }, index * 100);
+                });
+            }
+
+            function createTransactionCard(transaction) {
+                const card = document.createElement('div');
+                card.className = 'transaction-card';
+                
+                const similarityPercent = Math.round((transaction.similarity_score || 0) * 100);
+                const category = transaction.category || 'other';
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="vendor-info">
+                            <h3>${transaction.vendor || 'Unknown Vendor'}</h3>
+                            <div class="transaction-date">${transaction.date || 'Unknown Date'}</div>
+                        </div>
+                        <div class="similarity-section">
+                            <div class="similarity-score">${similarityPercent}% match</div>
+                            <div class="similarity-bar">
+                                <div class="similarity-fill" style="width: ${similarityPercent}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="amount">$${(transaction.amount || 0).toFixed(2)}</div>
+                        <span class="category-badge category-${category}">${category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                        
+                        <div class="transaction-details">
+                            <span>💳 ${(transaction.payment_method || 'unknown').charAt(0).toUpperCase() + (transaction.payment_method || 'unknown').slice(1)}</span>
+                            <span>${(transaction.items || []).length} items</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <span style="color: #A0A0A0; font-size: 0.875rem;">ID: #${transaction.id}</span>
+                        <button class="view-btn" onclick="viewTransaction(${transaction.id})">
+                            👁️ View Details
+                        </button>
+                    </div>
+                `;
+                
+                return card;
+            }
+
+            // Global functions
+            window.searchExample = function(query) {
+                searchInput.value = query;
+                performSearch(query);
+            };
+
+            window.viewTransaction = function(transactionId) {
+                window.location.href = `/preview/${transactionId}`;
+            };
+        });
+    </script>
+</body>
+</html>
