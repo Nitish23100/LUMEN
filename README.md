@@ -5,7 +5,6 @@ A modern Flask web application with dark theme and glassmorphism design.
 
 ## Features
 
-- Dark theme with purple gradient colors
 - Glassmorphism UI effects
 - File upload functionality
 - Bootstrap 5 responsive design
